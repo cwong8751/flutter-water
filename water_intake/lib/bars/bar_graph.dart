@@ -52,7 +52,7 @@ class BarGraph extends StatelessWidget {
                   toY: data.y,
                   color: Colors.lightGreen[700],
                   width: 23,
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(6)),
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(6), topRight: Radius.circular(6)),
                   backDrawRodData: BackgroundBarChartRodData(
                     show: true,
                     toY: maxY,
@@ -75,31 +75,8 @@ class BarGraph extends StatelessWidget {
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                getTitlesWidget: (double value, TitleMeta meta) {
-                  const style = TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  );
-                  switch (value.toInt()) {
-                    case 0:
-                      return const Text('Sun', style: style);
-                    case 1:
-                      return const Text('Mon', style: style);
-                    case 2:
-                      return const Text('Tue', style: style);
-                    case 3:
-                      return const Text('Wed', style: style);
-                    case 4:
-                      return const Text('Thu', style: style);
-                    case 5:
-                      return const Text('Fri', style: style);
-                    case 6:
-                      return const Text('Sat', style: style);
-                    default:
-                      return const Text('', style: style);
-                  }
-                },
+                getTitlesWidget: (value, meta) => getBottomTitlesWidget(value, meta),
+
               ),
             ),
           ),
@@ -107,4 +84,44 @@ class BarGraph extends StatelessWidget {
       ),
     );
   }
+}
+
+
+Widget getBottomTitlesWidget(double value, TitleMeta meta){
+  const TextStyle style = TextStyle(
+    color: Colors.black,
+    fontWeight: FontWeight.bold,
+    fontSize: 12,
+  );
+
+  Widget text;
+
+  switch (value.toInt()) {
+    case 0:
+      text = const Text('S', style: style);
+      break;
+    case 1:
+      text = const Text('M', style: style);
+      break;
+    case 2:
+      text = const Text('T', style: style);
+      break;
+    case 3:
+      text = const Text('W', style: style);
+      break;
+    case 4:
+      text = const Text('T', style: style);
+      break;
+    case 5:
+      text = const Text('F', style: style);
+      break;
+    case 6:
+      text = const Text('S', style: style);
+      break;
+    default:
+      text = const Text('');
+      break;
+  }
+
+  return SideTitleWidget(child: text, axisSide: meta.axisSide, space: 3);
 }
