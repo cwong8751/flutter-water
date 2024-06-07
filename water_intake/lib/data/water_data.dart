@@ -50,6 +50,7 @@ class WaterData extends ChangeNotifier {
 
       _waterDataList = extractedData.entries.map((e) {
         return WaterModel(
+          id: e.key,
           amount: e.value['amount'],
           dateTime: DateTime.parse(e.value['dateTime']),
           unit: e.value['unit'],
@@ -58,5 +59,16 @@ class WaterData extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  void delete(WaterModel waterModel) {
+    final url = Uri.https(
+        'water-intake-98ee9-default-rtdb.firebaseio.com', 'water/${waterModel.id}.json');
+
+        http.delete(url);
+
+    _waterDataList.removeWhere((element) => element.id == waterModel.id);
+    notifyListeners();
+
   }
 }
