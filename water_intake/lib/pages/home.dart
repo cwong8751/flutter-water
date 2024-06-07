@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:provider/provider.dart';
+import 'package:water_intake/data/water_data.dart';
+import 'package:water_intake/models/water_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,24 +11,22 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final amountController = TextEditingController(text: 'Hello');
+  final amountController = TextEditingController();
 
-  void saveWater(String amount) async {
-    final url = Uri.parse('https://water-intaker-default-rtdb.firebaseio.com/water.json');
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<WaterData>(context, listen: false).getWater();
+  }
 
-    var response = await http.post(url, headers: {
-      'Content-Type': 'application/json',
-    }, body: json.encode({
-      'amount': double.parse(amount),
-      'unit': 'ml',
-      'dateTime': DateTime.now().toString()
-    }));
+  void saveWater() async {
+    Provider.of<WaterData>(context, listen: false).addWater(WaterModel(
+        amount: double.parse(amountController.text),
+        dateTime: DateTime.now(),
+        unit: 'ml'));
 
-    if (response.statusCode == 200) {
-      print('Data saved');
-      Navigator.of(context).pop(); // Close the dialog after saving data
-    } else {
-      print('Failed to save data');
+    if (!context.mounted) {
+      return;
     }
   }
 
@@ -35,17 +34,17 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Add water'),
+        title: const Text('Add water'),
         content: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Add water to your daily intake'),
-            SizedBox(height: 10),
+            const Text('Add water to your daily intake'),
+            const SizedBox(height: 10),
             TextField(
               controller: amountController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Amount',
               ),
@@ -57,13 +56,14 @@ class _HomePageState extends State<HomePage> {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
-              saveWater(amountController.text);
+              saveWater();
+              Navigator.of(context).pop();
             },
-            child: Text('Save'),
+            child: const Text('Save'),
           ),
         ],
       ),
@@ -72,19 +72,28 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 4,
-        centerTitle: true,
-        actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.map)),
-        ],
-        title: Text('Water'),
-      ),
-      backgroundColor: Theme.of(context).colorScheme.background,
-      floatingActionButton: FloatingActionButton(
-        onPressed: addWater,
-        child: Icon(Icons.add),
+    return Consumer<WaterData>(
+      builder: (context, value, child) => Scaffold(
+        appBar: AppBar(
+          elevation: 4,
+          centerTitle: true,
+          actions: [
+            IconButton(onPressed: () {}, icon: const Icon(Icons.map)),
+          ],
+          title: const Text('Water'),
+        ),
+        body: ListView.builder(
+          itemCount: value.waterData.length,
+          itemBuilder: (context, index) {
+            final waterModel = value.waterData[index];
+            return ListTile(title: Text(waterModel.amount.toString()), subtitle: Text(waterModel.id.toString()),);
+          },
+        ),
+        backgroundColor: Theme.of(context).colorScheme.background,
+        floatingActionButton: FloatingActionButton(
+          onPressed: addWater,
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
