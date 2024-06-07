@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:water_intake/components/water_intake_summary.dart';
 import 'package:water_intake/components/water_tile.dart';
 import 'package:water_intake/data/water_data.dart';
 import 'package:water_intake/models/water_model.dart';
@@ -21,18 +22,10 @@ class _HomePageState extends State<HomePage> {
     _loadData();
   }
 
-  void _loadData() async {
-    await Provider.of<WaterData>(context, listen: false).getWater().then( (values) => {
-      if(values.isNotEmpty){
-        setState(() {
-          _isLoading = false;
-        })
-      }
-      else{
-        setState(() {
-          _isLoading = true;
-        })
-      }
+  Future<void> _loadData() async {
+    await Provider.of<WaterData>(context, listen: false).getWater();
+    setState(() {
+      _isLoading = false;
     });
   }
 
@@ -95,21 +88,27 @@ class _HomePageState extends State<HomePage> {
     return Consumer<WaterData>(
       builder: (context, value, child) => Scaffold(
         appBar: AppBar(
-          elevation: 4,
           centerTitle: true,
           actions: [
             IconButton(onPressed: () {}, icon: const Icon(Icons.map)),
           ],
           title: const Text('Water'),
         ),
-        body: !_isLoading
+        body: _isLoading
             ? Center(child: CircularProgressIndicator())
-            : ListView.builder(
-                itemCount: value.waterData.length,
-                itemBuilder: (context, index) {
-                  final waterModel = value.waterData[index];
-                  return WaterTile(waterModel: waterModel);
-                },
+            : Column(
+                children: [
+                  WaterSummary(startOfWeek: value.getStartOfWeek()),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: value.waterData.length,
+                      itemBuilder: (context, index) {
+                        final waterModel = value.waterData[index];
+                        return WaterTile(waterModel: waterModel);
+                      },
+                    ),
+                  ),
+                ],
               ),
         backgroundColor: Theme.of(context).colorScheme.background,
         floatingActionButton: FloatingActionButton(

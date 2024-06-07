@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Water intake',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreen),
           useMaterial3: true,
         ),
         home: const HomePage(),

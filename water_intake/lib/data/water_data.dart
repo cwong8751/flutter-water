@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:water_intake/models/water_model.dart';
 import 'package:http/http.dart' as http;
 
@@ -60,6 +61,41 @@ class WaterData extends ChangeNotifier {
 
     notifyListeners();
     return _waterDataList;
+  }
+
+  DateTime getStartOfWeek(){
+    DateTime? startOfWeek;
+
+    DateTime dateTime = DateTime.now();
+    
+    for(int i = 0; i < 7; i++){
+      if(getWeekDay(dateTime.subtract(Duration(days: i))) == 'Sun'){
+        startOfWeek = dateTime.subtract(Duration(days: i));
+      }
+    }
+
+    return startOfWeek!;
+  }
+
+  String getWeekDay(DateTime dateTime){
+    switch(dateTime.weekday){
+      case 1:
+        return 'Mon';
+      case 2:
+        return 'Tue';
+      case 3:
+        return 'Wed';
+      case 4:
+        return 'Thu';
+      case 5:
+        return 'Fri';
+      case 6:
+        return 'Sat';
+      case 7:
+        return 'Sun';
+      default: 
+        return '';
+    }
   }
 
   void delete(WaterModel waterModel) {
