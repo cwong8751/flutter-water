@@ -37,7 +37,7 @@ class WaterData extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getWater() async {
+  Future<List<WaterModel>> getWater() async {
     final url = Uri.https(
         'water-intake-98ee9-default-rtdb.firebaseio.com', 'water.json');
 
@@ -59,6 +59,7 @@ class WaterData extends ChangeNotifier {
     }
 
     notifyListeners();
+    return _waterDataList;
   }
 
   void delete(WaterModel waterModel) {

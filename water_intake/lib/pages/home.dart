@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:water_intake/components/water_tile.dart';
 import 'package:water_intake/data/water_data.dart';
@@ -14,22 +13,41 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final amountController = TextEditingController();
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    Provider.of<WaterData>(context, listen: false).getWater();
+    _loadData();
+  }
+
+  void _loadData() async {
+    await Provider.of<WaterData>(context, listen: false).getWater().then( (values) => {
+      if(values.isNotEmpty){
+        setState(() {
+          _isLoading = false;
+        })
+      }
+      else{
+        setState(() {
+          _isLoading = true;
+        })
+      }
+    });
   }
 
   void saveWater() async {
     Provider.of<WaterData>(context, listen: false).addWater(WaterModel(
-        amount: double.parse(amountController.text),
-        dateTime: DateTime.now(),
-        unit: 'ml'));
+      amount: double.parse(amountController.text),
+      dateTime: DateTime.now(),
+      unit: 'ml',
+    ));
 
     if (!context.mounted) {
       return;
     }
+
+    clearWater();
   }
 
   void addWater() {
@@ -84,13 +102,15 @@ class _HomePageState extends State<HomePage> {
           ],
           title: const Text('Water'),
         ),
-        body: ListView.builder(
-          itemCount: value.waterData.length,
-          itemBuilder: (context, index) {
-            final waterModel = value.waterData[index];
-            return WaterTile(waterModel: waterModel);
-          },
-        ),
+        body: !_isLoading
+            ? Center(child: CircularProgressIndicator())
+            : ListView.builder(
+                itemCount: value.waterData.length,
+                itemBuilder: (context, index) {
+                  final waterModel = value.waterData[index];
+                  return WaterTile(waterModel: waterModel);
+                },
+              ),
         backgroundColor: Theme.of(context).colorScheme.background,
         floatingActionButton: FloatingActionButton(
           onPressed: addWater,
@@ -98,5 +118,9 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  void clearWater() {
+    amountController.clear();
   }
 }
